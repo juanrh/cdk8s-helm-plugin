@@ -16,7 +16,9 @@ cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
 # Install
 helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml
 helm -n testns list
+kubectl -n testns get deployments
 # Upgrade
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml --dry-run
 helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml
 helm -n testns list
 

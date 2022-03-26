@@ -2,26 +2,30 @@
 
 # Example usage
 # export HELM_NAMESPACE=testns # this is set by Helm plugin system
-# ./cdk8s-helm-install.sh hello-cdk8s-chart ../../hello-cdk8s
+# ./cdk8s-helm.sh hello-cdk8s-chart install ../../hello-cdk8s
 
 set -eu
 
 # TODO: Pass other flags to helm
-if (($# < 3 || $# > 4)); then
-  echo "Usage: $0 <helm chart name> <cdk8s chart directory> [values yaml file]"
+if (($# < 3 )); then
+  echo "Usage: $0 <helm chart name> <cdk8s chart directory> [values yaml file] [other helm arguments]"
   exit 1
 fi
 
 # currently only 'install' and 'upgrade' supported. TODO: validate 
 HELM_VERB=${1}
-CHART_NAME=${2}
-CHART_ROOT=${3}
-CHART_VALUES=${4:-''}
+shift
+CHART_NAME=${1}
+shift
+CHART_ROOT=${1}
+shift
+CHART_VALUES=${1:-''}
+shift
 
 VALUES_FILENAME='values.yml'
 HELM_CHART_ROOT='chart'
 
-echo "Installing cdk chart using CHART_NAME='${CHART_NAME}' CHART_ROOT='${CHART_ROOT}', CHART_VALUES='${CHART_VALUES}'"
+echo "Running Helm ${HELM_VERB} cdk chart using CHART_NAME='${CHART_NAME}' CHART_ROOT='${CHART_ROOT}', CHART_VALUES='${CHART_VALUES}'"
 temp_dir=$(mktemp -d)
 pushd ${temp_dir}
 
@@ -43,9 +47,9 @@ cp dist/*.yaml ${HELM_CHART_ROOT}/templates
 tree ${HELM_CHART_ROOT}
 echo "Synthesizing cdk8s chart done"
 
-echo "Installing cdk8s chart"
-helm -n $HELM_NAMESPACE ${HELM_VERB} ${CHART_NAME} ${HELM_CHART_ROOT}
-echo "Installing cdk8s chart done"
+echo "Running Helm ${HELM_VERB} cdk8s chart"
+${HELM_BIN} -n $HELM_NAMESPACE ${HELM_VERB} ${CHART_NAME} ${HELM_CHART_ROOT} "$@"
+echo "Running Helm ${HELM_VERB} cdk8s chart done"
 
 
 popd

@@ -3,4 +3,4 @@ version: "0.1.0"
 usage: "synthesize a cdk8s chart and install it as a Helm chart"
 description: "synthesize a cdk8s chart and install it as a Helm chart"
 ignoreFlags: false
-command: ${HELM_PLUGIN_DIR}/cdk8s-helm-install.sh
+command: ${HELM_PLUGIN_DIR}/cdk8s-helm.sh
