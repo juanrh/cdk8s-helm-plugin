@@ -71,12 +71,11 @@ NAME    NAMESPACE       REVISION        UPDATED STATUS  CHART   APP VERSION
 
 ### Prerequisites
 
-Optional: install [cdk8s CLI](https://cdk8s.io/docs/latest/getting-started/).  
-We can use that command for scaffolding, e.g. `cdk8s init go-app`
+Install [cdk8s CLI](https://cdk8s.io/docs/latest/getting-started/).
 
 ### Common development tasks
 
-Install with `make install`. After that an option "cdk8s" appears for `helm -h`.  
+Install plugin with `make install`. After that an option "cdk8s" appears for `helm -h`.
 
-Then run the plugin `helm cdk8s <helm chart name> <cdk8s chart directory> [values yaml file]`
+Then run the plugin `helm cdk8s install|upgrade <helm chart name> <cdk8s chart directory> [values yaml file] [other helm options]`
 
