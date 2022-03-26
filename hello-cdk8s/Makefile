@@ -27,4 +27,4 @@ clean:
 	rm -rf imports
 	rm -rf dist
 
-release: clean import deps build synth
+release: clean import deps build

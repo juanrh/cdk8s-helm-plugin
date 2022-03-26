@@ -14,6 +14,8 @@ make install
 helm -n testns list
 kubectl create namespace testns
 cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
+# build example cdk8s chart
+make -C ${cdk8s_chart_root}
 # Install
 helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yml
 helm -n testns list
