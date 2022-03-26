@@ -11,15 +11,16 @@
 
 ```bash
 make install
+helm -n testns list
 kubectl create namespace testns
 cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
 # Install
-helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml
+helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yml
 helm -n testns list
 kubectl -n testns get deployments
 # Upgrade
-helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml --dry-run
-helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yml --dry-run
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yml
 helm -n testns list
 
 # Rollback and uninstall as usual in Helm
