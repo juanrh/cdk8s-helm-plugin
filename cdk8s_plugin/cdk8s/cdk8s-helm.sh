@@ -22,7 +22,7 @@ shift
 CHART_VALUES=${1:-''}
 shift
 
-VALUES_FILENAME='values.yml'
+VALUES_FILENAME='values.yaml'
 HELM_CHART_ROOT='chart'
 
 echo "Running Helm ${HELM_VERB} cdk chart using CHART_NAME='${CHART_NAME}' CHART_ROOT='${CHART_ROOT}', CHART_VALUES='${CHART_VALUES}'"

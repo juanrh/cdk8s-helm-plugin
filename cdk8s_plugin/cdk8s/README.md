@@ -4,7 +4,7 @@
 
 - The cdk8s chart program is specified as a path to its root directory, so `cdk8s synth` synthesizes the chart. 
   - This directory should also contain a [Chart.yaml file](https://helm.sh/docs/topics/charts/#the-chartyaml-file) for Helm.
-- When a file `values.yml` is present in the same directory as the cdk8s chart program, then it will read it and use it as input props. 
+- When a file `values.yaml` is present in the same directory as the cdk8s chart program, then it will read it and use it as input props. 
 - The cdk8s chart program generates its output in `dist/*.yaml`.
 
 ## Demo
@@ -17,12 +17,12 @@ cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
 # build example cdk8s chart
 make -C ${cdk8s_chart_root}
 # Install
-helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yml
+helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values.yaml
 helm -n testns list
 kubectl -n testns get deployments
 # Upgrade
-helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yml --dry-run
-helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yml
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yaml --dry-run
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_root} ${cdk8s_chart_root}/values2.yaml
 helm -n testns list
 
 # Rollback and uninstall as usual in Helm

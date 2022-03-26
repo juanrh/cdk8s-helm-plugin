@@ -14,7 +14,7 @@ import (
 )
 
 const (
-	valuesFile = "./values.yml"
+	valuesFile = "./values.yaml"
 )
 
 var (
