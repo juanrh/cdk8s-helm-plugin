@@ -108,9 +108,5 @@ func main() {
 	}
 	NewMyChart(app, "hello-cdk8s", props)
 
-	j, _ := yaml.Marshal(props.values)
-	log.Printf("Using values %q", j)
-
-
 	app.Synth()
 }
