@@ -38,7 +38,8 @@ echo "Synthesizing cdk8s chart"
 cdk8s synth
 mkdir ${HELM_CHART_ROOT}
 cp Chart.yaml ${HELM_CHART_ROOT}
-cp dist/*.yaml ${HELM_CHART_ROOT}
+mkdir ${HELM_CHART_ROOT}/templates
+cp dist/*.yaml ${HELM_CHART_ROOT}/templates
 tree ${HELM_CHART_ROOT}
 echo "Synthesizing cdk8s chart done"
 
