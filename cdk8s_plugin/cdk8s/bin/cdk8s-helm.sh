@@ -37,13 +37,14 @@ case $VERB in
     echo "Running cdk ${VERB} chart using CHART_NAME='${CHART_NAME}' CHART_URI='${CHART_URI}', CHART_VALUES='${CHART_VALUES}'"
     ;;
 esac
+OTHER_HELM_ARGS=$@
 
 VALUES_FILENAME='values.yaml'
 HELM_CHART_ROOT='chart'
 
 function run_helm {
   echo "Running Helm ${VERB} cdk8s chart"
-  ${HELM_BIN} -n $HELM_NAMESPACE ${VERB} ${CHART_NAME} ${HELM_CHART_ROOT} "$@"
+  ${HELM_BIN} -n $HELM_NAMESPACE ${VERB} ${CHART_NAME} ${HELM_CHART_ROOT} $OTHER_HELM_ARGS
   echo "Running Helm ${VERB} cdk8s chart done"
 }
 
