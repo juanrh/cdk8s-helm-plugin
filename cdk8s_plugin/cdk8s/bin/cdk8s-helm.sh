@@ -1,0 +1,171 @@
+#!/usr/bin/env bash
+
+# Example usage
+# export HELM_NAMESPACE=testns # this is set by Helm plugin system
+# ./cdk8s-helm.sh hello-cdk8s-chart install ../../hello-cdk8s
+
+set -eu
+
+# TODO: Pass other flags to helm
+if (($# < 3 )); then
+  echo "Usage:"
+  echo "$0 [install|upgrade] <helm chart name> <cdk8s chart URI> [values yaml file] [other helm arguments]"
+  echo "$0 publish <cdk8s chart root path> <cdk8s chart URI>"
+  exit 1
+fi
+
+# TODO: validate 
+VERB=${1}
+shift
+case $VERB in
+  publish)
+    CDK_CHART_ROOT=${1}
+    shift
+    CHART_URI=${1}
+    shift
+    echo "Running cdk ${VERB} chart using CDK_CHART_ROOT='${CDK_CHART_ROOT}' CHART_URI='${CHART_URI}'"
+    ;;
+    
+
+  *)
+    CHART_NAME=${1}
+    shift
+    CHART_URI=${1}
+    shift
+    CHART_VALUES=${1:-''}
+    shift
+    echo "Running cdk ${VERB} chart using CHART_NAME='${CHART_NAME}' CHART_URI='${CHART_URI}', CHART_VALUES='${CHART_VALUES}'"
+    ;;
+esac
+
+VALUES_FILENAME='values.yaml'
+HELM_CHART_ROOT='chart'
+
+function run_helm {
+  echo "Running Helm ${VERB} cdk8s chart"
+  ${HELM_BIN} -n $HELM_NAMESPACE ${VERB} ${CHART_NAME} ${HELM_CHART_ROOT} "$@"
+  echo "Running Helm ${VERB} cdk8s chart done"
+}
+
+function run_chart_local {
+  temp_dir=$(mktemp -d)
+  pushd ${temp_dir}
+
+
+  echo "Fetching cdk8s chart"
+  cp -r ${CHART_URI}/* .
+  if [ ! -z "${CHART_VALUES}" ]
+  then
+      cp ${CHART_VALUES} ${VALUES_FILENAME}
+  fi
+  echo "Fetching cdk8s chart done"
+
+  echo "Synthesizing cdk8s chart"
+  cdk8s synth
+  mkdir ${HELM_CHART_ROOT}
+  cp Chart.yaml ${HELM_CHART_ROOT}
+  mkdir ${HELM_CHART_ROOT}/templates
+  cp dist/*.yaml ${HELM_CHART_ROOT}/templates
+  tree ${HELM_CHART_ROOT}
+  echo "Synthesizing cdk8s chart done"
+
+  run_helm
+
+  popd
+  rm -rf ${temp_dir}
+}
+
+function chart_uri_type {
+  # Examples:
+  # chart_uri_type oci://juanrh/cdk-chart-hello-cdk8s:latest
+  # chart_uri_type chart_uri_type $(pwd)/../../hello-cdk8s
+  URI="${1}"
+
+  echo ${URI} | grep -q '^oci://'
+  if [ "$?" -eq "0" ]
+  then
+    echo "oci";
+  else
+    # NOTE: defaulting to local
+    echo "local"
+  fi
+}
+
+
+function publish_chart {
+  echo "Publishing chart to ${CHART_URI}"
+
+  if [ $(chart_uri_type ${CHART_URI}) != "oci" ]
+  then
+    echo "Currently only the scheme 'oci://' for OCI registry is supported, abort"
+    exit 1
+  fi 
+
+  temp_dir=$(mktemp -d)
+  pushd ${temp_dir}
+
+  echo "Only Golang CDK charts are currently supported, assuming Golang chart"
+  cp ${HELM_PLUGIN_DIR}/Dockerfile .
+  mkdir src
+  cp -r ${CDK_CHART_ROOT} src
+  image_tag=${CHART_URI#oci://}
+  echo "Building image ${image_tag}"
+  docker build --build-arg chart_basename=$(basename ${CDK_CHART_ROOT}) -t ${image_tag} .
+  echo "Pushing image ${image_tag}"
+  docker push ${image_tag}
+
+
+  popd
+  rm -rf ${temp_dir}
+}
+
+function run_chart_oci {
+  temp_dir=$(mktemp -d)
+  pushd ${temp_dir}
+
+  if [ ! -z "${CHART_VALUES}" ]
+  then
+      mount_values="-v $(realpath ${CHART_VALUES}):/go/src/values.yaml"
+  fi
+  image_tag=${CHART_URI#oci://}
+  echo "Fetching cdk8s chart"
+  docker pull ${image_tag}
+  echo "Fetching cdk8s chart done"
+
+  echo "Synthesizing cdk8s chart"
+  cdk_run="cdk-synth-$(date +%s)" 
+  docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && cp Chart.yaml .. && cdk8s synth && echo "CHART START" && cat dist/*.yaml' &> cdk.out
+  sed '1,/CHART START/!d' cdk.out | head -n -1
+  sed '1,/CHART START/d' cdk.out > chart.yaml
+  mkdir ${HELM_CHART_ROOT}
+  docker cp ${cdk_run}:/go/src/Chart.yaml ${HELM_CHART_ROOT}
+  docker container rm ${cdk_run}
+  mkdir ${HELM_CHART_ROOT}/templates
+  cp chart.yaml ${HELM_CHART_ROOT}/templates
+  tree ${HELM_CHART_ROOT}
+  echo "Synthesizing cdk8s chart done"
+
+  run_helm
+
+
+  popd
+  rm -rf ${temp_dir}
+}
+
+case $VERB in
+  publish)
+    publish_chart
+    ;;
+
+
+  *)
+    case $(chart_uri_type ${CHART_URI}) in
+      local)
+        run_chart_local
+        ;;
+      oci)
+        run_chart_oci
+        ;;
+    esac
+    ;;
+esac
