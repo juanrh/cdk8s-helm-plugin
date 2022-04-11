@@ -33,7 +33,7 @@ case $VERB in
     CHART_URI=${1}
     shift
     CHART_VALUES=${1:-''}
-    shift
+    shift || true
     echo "Running cdk ${VERB} chart using CHART_NAME='${CHART_NAME}' CHART_URI='${CHART_URI}', CHART_VALUES='${CHART_VALUES}'"
     ;;
 esac
@@ -124,6 +124,7 @@ function run_chart_oci {
   temp_dir=$(mktemp -d)
   pushd ${temp_dir}
 
+  mount_values=""
   if [ ! -z "${CHART_VALUES}" ]
   then
       mount_values="-v $(realpath ${CHART_VALUES}):/go/src/values.yaml"
@@ -135,7 +136,7 @@ function run_chart_oci {
 
   echo "Synthesizing cdk8s chart"
   cdk_run="cdk-synth-$(date +%s)" 
-  docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && cp Chart.yaml .. && cdk8s synth && echo "CHART START" && cat dist/*.yaml' &> cdk.out
+  docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm -f values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && cp Chart.yaml .. && cdk8s synth && echo "CHART START" && cat dist/*.yaml' &> cdk.out
   sed '1,/CHART START/!d' cdk.out | head -n -1
   sed '1,/CHART START/d' cdk.out > chart.yaml
   mkdir ${HELM_CHART_ROOT}
