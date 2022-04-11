@@ -112,5 +112,6 @@ Install [cdk8s CLI](https://cdk8s.io/docs/latest/getting-started/).
 
 Install plugin with `make install`. After that an option "cdk8s" appears for `helm -h`.
 
-Then run the plugin `helm cdk8s install|upgrade <helm chart name> <cdk8s chart directory> [values yaml file] [other helm options]`
+Then run the plugin, see "Usage" section in `cdk8s_plugin/cdk8s/bin/cdk8s-helm.sh` for an updated list of available options.  
+To debug add `x` to the `set` call in `cdk8s_plugin/cdk8s/bin/cdk8s-helm.sh`.
 

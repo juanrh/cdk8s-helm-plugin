@@ -1,9 +1,5 @@
 #!/usr/bin/env bash
 
-# Example usage
-# export HELM_NAMESPACE=testns # this is set by Helm plugin system
-# ./cdk8s-helm.sh hello-cdk8s-chart install ../../hello-cdk8s
-
 set -eu
 
 # TODO: Pass other flags to helm
