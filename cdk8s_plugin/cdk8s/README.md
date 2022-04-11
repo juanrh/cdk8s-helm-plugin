@@ -9,6 +9,8 @@
 
 ## Demo
 
+Install plugin and setup demo.
+
 ```bash
 $ make install
 ...
@@ -16,6 +18,11 @@ $ kubectl create namespace testns
 namespace/testns created
 $ helm -n testns list
 NAME    NAMESPACE       REVISION        UPDATED STATUS  CHART   APP VERSION
+```
+
+### Install from local filesystem
+
+```bash
 $ cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
 # build example cdk8s chart
 $ make -C ${cdk8s_chart_root}
@@ -65,6 +72,36 @@ $ helm -n testns uninstall hello-cdk8s-chart
 release "hello-cdk8s-chart" uninstalled
 $ helm -n testns list
 NAME    NAMESPACE       REVISION        UPDATED STATUS  CHART   APP VERSION
+```
+
+### Publish to image registry and install from image registry
+
+```bash
+cdk8s_chart_root="$(pwd)/../../hello-cdk8s"
+cdk8s_chart_dist_uri='oci://juanrh/cdk-chart-hello-cdk8s:0.0.1'
+
+# Publish chart to https://hub.docker.com/repository/docker/juanrh/cdk-chart-hello-cdk8s/tags?page=1&ordering=last_updated
+helm cdk8s publish ${cdk8s_chart_root} ${cdk8s_chart_dist_uri}
+
+# Install chart from docker hub
+docker image rm ${cdk8s_chart_dist_uri#oci://}
+helm -n testns cdk8s install hello-cdk8s-chart ${cdk8s_chart_dist_uri} ${cdk8s_chart_root}/values2.yaml
+$  helm -n testns list
+NAME                    NAMESPACE       REVISION        UPDATED                                         STATUS          CHART                   APP VERSION
+hello-cdk8s-chart       testns          1               2022-04-11 21:06:29.037008846 +0200 CEST        deployed        buildachart-0.1.0       0.1.0 
+
+$ kubectl -n testns get deployments
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+hello-cdk8s-hello-deployment-c886f425   3/3     3            3           24s
+
+
+helm -n testns cdk8s upgrade hello-cdk8s-chart ${cdk8s_chart_dist_uri} ${cdk8s_chart_root}/values.yaml
+$ kubectl -n testns get deployments
+NAME                                    READY   UP-TO-DATE   AVAILABLE   AGE
+hello-cdk8s-ghost-deployment-c83744f7   1/1     1            1           7s
+hello-cdk8s-hello-deployment-c886f425   2/2     2            2           55s
+
+helm -n testns uninstall hello-cdk8s-chart
 ```
 
 ## Development
