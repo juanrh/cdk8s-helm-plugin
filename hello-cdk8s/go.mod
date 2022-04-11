@@ -9,4 +9,3 @@ require (
 	sigs.k8s.io/yaml v1.3.0
 )
 
-replace github.com/juanrh/hello-cdk8s => ./

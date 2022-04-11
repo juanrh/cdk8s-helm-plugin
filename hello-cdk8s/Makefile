@@ -5,11 +5,14 @@
 
 OUTPUT_EXEC := dist/hello-cdk8s
 OUTPUT_MANIFEST := dist/hello-cdk8s.k8s.yaml
+PACKAGE_GOPATH_ROOT := $$(go env GOPATH)/src/github.com/juanrh/hello-cdk8s
+ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 
 build:
 	go build -o $(OUTPUT_EXEC)
 
 deps:
+	ls $(PACKAGE_GOPATH_ROOT) || (mkdir -p $$(dirname $(PACKAGE_GOPATH_ROOT))  && ln -s $(ROOT_DIR) $(PACKAGE_GOPATH_ROOT))
 	go get .
 
 synth:
