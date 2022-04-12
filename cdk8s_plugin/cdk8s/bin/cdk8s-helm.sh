@@ -132,14 +132,11 @@ function run_chart_oci {
 
   echo "Synthesizing cdk8s chart"
   cdk_run="cdk-synth-${CHART_NAME}-$(date +%s)"
-  docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm -f values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && cp Chart.yaml .. && cdk8s synth && echo "CHART START" && cat dist/*.yaml' &> cdk.out
-  sed '1,/CHART START/!d' cdk.out | head -n -1
-  sed '1,/CHART START/d' cdk.out > chart.yaml
+  docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm -f values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && mkdir -p ../chart/templates && cp Chart.yaml ../chart && cdk8s synth && cp dist/*.yaml ../chart/templates'
   mkdir ${HELM_CHART_ROOT}
-  docker cp ${cdk_run}:/go/src/Chart.yaml ${HELM_CHART_ROOT}
+  docker cp ${cdk_run}:/go/src/chart/Chart.yaml ${HELM_CHART_ROOT}
+  docker cp ${cdk_run}:/go/src/chart/templates ${HELM_CHART_ROOT}
   docker container rm ${cdk_run}
-  mkdir ${HELM_CHART_ROOT}/templates
-  cp chart.yaml ${HELM_CHART_ROOT}/templates
   tree ${HELM_CHART_ROOT}
   echo "Synthesizing cdk8s chart done"
 
