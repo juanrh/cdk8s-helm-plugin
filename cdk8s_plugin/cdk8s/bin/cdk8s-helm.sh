@@ -131,7 +131,7 @@ function run_chart_oci {
   echo "Fetching cdk8s chart done"
 
   echo "Synthesizing cdk8s chart"
-  cdk_run="cdk-synth-$(date +%s)" 
+  cdk_run="cdk-synth-${CHART_NAME}-$(date +%s)"
   docker run -it --name ${cdk_run} ${mount_values} ${image_tag} /bin/bash -c '((ls /go/src/values.yaml && rm -f values.yaml && ln -s /go/src/values.yaml values.yaml) || true) && cp Chart.yaml .. && cdk8s synth && echo "CHART START" && cat dist/*.yaml' &> cdk.out
   sed '1,/CHART START/!d' cdk.out | head -n -1
   sed '1,/CHART START/d' cdk.out > chart.yaml
