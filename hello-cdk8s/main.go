@@ -19,7 +19,7 @@ const (
 
 var (
 	defaultMyChartValues = MyChartValues{
-		LaunchGhostService:   true,
+		LaunchNginx:          true,
 		HelloServiceReplicas: 2,
 	}
 )
@@ -30,7 +30,7 @@ type MyChartProps struct {
 }
 
 type MyChartValues struct {
-	LaunchGhostService   bool `json:"launchGhostService"`
+	LaunchNginx          bool `json:"launchNginx"`
 	HelloServiceReplicas uint `json:"helloServiceReplicas"`
 }
 
@@ -45,9 +45,9 @@ func NewMyChart(scope constructs.Construct, id string, props *MyChartProps) cdk8
 		Image:    jsii.String("paulbouwer/hello-kubernetes:1.7"),
 		Replicas: jsii.Number(float64(props.values.HelloServiceReplicas)),
 	})
-	if props.values.LaunchGhostService {
-		cons.NewWebService(chart, jsii.String("ghost"), &cons.WebServiceProps{
-			Image:         jsii.String("ghost"),
+	if props.values.LaunchNginx {
+		cons.NewWebService(chart, jsii.String("nginx"), &cons.WebServiceProps{
+			Image:         jsii.String("nginx:mainline-alpine3.18-slim"),
 			ContainerPort: jsii.Number(2368),
 		})
 	}

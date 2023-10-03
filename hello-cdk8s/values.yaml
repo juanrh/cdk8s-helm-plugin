@@ -1,2 +1,2 @@
-launchGhostService: true
+launchNginx: true
 helloServiceReplicas: 2
