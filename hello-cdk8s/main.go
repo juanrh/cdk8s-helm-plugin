@@ -6,9 +6,9 @@ import (
 	"log"
 	"os"
 
-	"github.com/aws/constructs-go/constructs/v3"
+	"github.com/aws/constructs-go/constructs/v10"
 	"github.com/aws/jsii-runtime-go"
-	"github.com/cdk8s-team/cdk8s-core-go/cdk8s"
+	"github.com/cdk8s-team/cdk8s-core-go/cdk8s/v2"
 	"github.com/juanrh/hello-cdk8s/cons"
 	"sigs.k8s.io/yaml"
 )
@@ -19,7 +19,7 @@ const (
 
 var (
 	defaultMyChartValues = MyChartValues{
-		LaunchGhostService: true,
+		LaunchGhostService:   true,
 		HelloServiceReplicas: 2,
 	}
 )
@@ -30,7 +30,7 @@ type MyChartProps struct {
 }
 
 type MyChartValues struct {
-	LaunchGhostService bool `json:"launchGhostService"`
+	LaunchGhostService   bool `json:"launchGhostService"`
 	HelloServiceReplicas uint `json:"helloServiceReplicas"`
 }
 
@@ -51,14 +51,13 @@ func NewMyChart(scope constructs.Construct, id string, props *MyChartProps) cdk8
 			ContainerPort: jsii.Number(2368),
 		})
 	}
-	
+
 	return chart
 }
 
-
 func setupLogging() {
-    log.SetPrefix("hello-cdk8s: ")
-    log.SetFlags(0)
+	log.SetPrefix("hello-cdk8s: ")
+	log.SetFlags(0)
 }
 
 func getChartProps() (*MyChartProps, error) {
@@ -73,12 +72,12 @@ func getChartProps() (*MyChartProps, error) {
 		return nil, err
 	}
 	log.Println("Using custom values")
-	file, err := os.Open(valuesFile) 
+	file, err := os.Open(valuesFile)
 	defer func() {
-        if err = file.Close(); err != nil {
-            log.Fatal(err)
-        }
-    }()
+		if err = file.Close(); err != nil {
+			log.Fatal(err)
+		}
+	}()
 	if err != nil {
 		return nil, err
 	}
